@@ -77,6 +77,7 @@ sudo apt upgrade -y
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/update%20and%20upgrade%20server.png)
 
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/instal%20nginx.png)
+
 __2.__ __Verify that nginx is active and running__
 
 ```
@@ -84,12 +85,14 @@ sudo systemctl status nginx
 ```
 https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/nginx%20running.png
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/nginx%20running.png)
+
 __3.__ __Access nginx locally on the Ubuntu shell__
 
 ```
 curl http://98.82.121.136
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/curl%20to%20confirm%20if%20working.png)
+
 __4.__ __Test with the public IP address if the Nginx server can respond to request from the internet using the url on a browser.__
 
 __5.__ __Now, you can visit your instance's public IP to verify that Nginx is working:
@@ -123,6 +126,7 @@ __2.__ __Assign the directory ownership with $USER which will reference the curr
 sudo chown -R $USER:$USER /var/www/projectLEMP
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/change%20permission%20of%20projectlemp%20user.png)
 ```
+
 __3.__ __Create a new configuration file in Nginx’s “sites-available” directory__.
 
 ```
