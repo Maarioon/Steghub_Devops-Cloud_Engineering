@@ -6,7 +6,7 @@
 Introduction:
 
 __The LEMP stack is a popular open-source web development platform that consists of four main components: Linux, Nginx, MySQL, and PHP (or sometimes Perl or Python). This documentation outlines the setup, configuration, and usage of the LEMP stack.__
-## Step 0: Prerequisites
+
 - **Linux**: The operating system that runs the server. In this guide, we'll use **Ubuntu** (a popular Linux distribution) to manage software installations and configurations.
 - **Nginx**: A high-performance web server. Nginx is used to serve static content (like HTML, CSS, and images) and pass dynamic requests (PHP) to the application server.
 - **MySQL**: The database management system (DBMS). MySQL stores and retrieves all the data used by your dynamic applications.
@@ -58,7 +58,7 @@ ssh -i /path/to/your-key.pem ubuntu@<your-ec2-public-ip>
 update your server
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/update%20and%20upgrade%20server.png)
 
-_5.__ The private ssh key that got downloaded was located, permission was changed for the private key file and then used to connect to the instance by running
+___ The private ssh key that got downloaded was located, permission was changed for the private key file and then used to connect to the instance by running
 ```
 chmod 400 my-ec2-key.pem
 ```
@@ -75,30 +75,24 @@ sudo apt update
 sudo apt upgrade -y
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/update%20and%20upgrade%20server.png)
-__2.__ __Install nginx__
-once the update is done, install nginx
 
-```
-sudo apt update
-sudo apt upgrade -y
-```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/instal%20nginx.png)
-__3.__ __Verify that nginx is active and running__
+__2.__ __Verify that nginx is active and running__
 
 ```
 sudo systemctl status nginx
-```https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/nginx%20running.png
+```
+https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/nginx%20running.png
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/nginx%20running.png)
-__4.__ __Access nginx locally on the Ubuntu shell__
+__3.__ __Access nginx locally on the Ubuntu shell__
 
 ```
 curl http://98.82.121.136
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/curl%20to%20confirm%20if%20working.png)
-__5.__ __Test with the public IP address if the Nginx server can respond to request from the internet using the url on a browser.__
+__4.__ __Test with the public IP address if the Nginx server can respond to request from the internet using the url on a browser.__
 
-```
-__4.__ __Now, you can visit your instance's public IP to verify that Nginx is working:
+__5.__ __Now, you can visit your instance's public IP to verify that Nginx is working:
 http://98.82.121.136
 You should see the default Nginx welcome page.
 
@@ -111,7 +105,7 @@ sudo apt install mysql-server
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/install%20mysql%20server.png)
 
-Configure the user and sey password
+Configure the user and key password
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/mysql%20create%20password.png)
 
 ## Step 4 - Configure nginx to use PHP processor
@@ -119,18 +113,16 @@ Configure the user and sey password
 __1.__ __Create a root web directory for your_domain__
 
 ```
-```
 sudo mkdir /var/www/projectLEMP
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/install%20php-fmp.png)
 
 __2.__ __Assign the directory ownership with $USER which will reference the current system user__
-__2.__ __Assign the directory ownership with $USER which will reference the current system user__
 
 ```
 sudo chown -R $USER:$USER /var/www/projectLEMP
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/611b52acaf67e5fb82be8d0c13b247011435c375/LEMP_STACK/images/change%20permission%20of%20projectlemp%20user.png)
-
+```
 __3.__ __Create a new configuration file in Nginx’s “sites-available” directory__.
 
 ```
@@ -289,13 +281,14 @@ __7.__ __To confirm that the data was successfully saved to the table run:__
 SELECT * FROM todo_database.todo_list;
 exit
 ```
+the select command acalso be used for several commands, removing, adding, verfying etc.
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/ae5d62bd648c009996499b5840b223e28188ad80/LEMP_STACK/images/insert%20into%20database.png)
 
 ### Create a PHP script that will connect to MySQL and query the content.
 
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/ae5d62bd648c009996499b5840b223e28188ad80/LEMP_STACK/images/database%20created.png)
 
-__1.__ __Create a new PHP file in the custom web root directory__
+__Create a new PHP file in the custom web root directory__
 ```
 sudo nano /var/www/projectLEMP/todo_list.php
 ```
