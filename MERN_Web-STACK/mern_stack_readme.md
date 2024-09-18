@@ -183,7 +183,7 @@ mkdir routes && cd routes && touch api.js
 
 __Copy__ the code below into the file
 
-```bash
+```
 const express = require('express');
 const router = express.Router();
 
@@ -222,7 +222,7 @@ npm install mongoose
 
 __2.__ __Create a new folder models, switch to models directory, create a file todo.js inside models. Open the file__
 
-```bash
+```
 mkdir models && cd models && touch todo.js
 ```
 
@@ -230,7 +230,7 @@ mkdir models && cd models && touch todo.js
 
 Past the code below into the file
 
-```bash
+```
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -254,12 +254,12 @@ The routes was updated from the file api.js in the ‘routes’ directory to mak
 
 __3.__ __In Routes directory, open api.js and delete the code inside with :%d__.
 
-```bash
+```
 vim api.js
 ```
 
 Paste the new code below into it
-```bash
+```
 const express = require('express');
 const router = express.Router();
 const Todo = require('../models/todo');
@@ -320,12 +320,12 @@ __1.__ __Create a MongoDB database and collection inside mLab__
 - Connect MongoDB with Node.js
 
 __2.__ __Create a file in your Todo directory and name it .env, open the file__
-```bash
+```
 touch .env && vim .env
 ```
 Add connection string below to access the database
 
-```bash
+```
 DB = ‘mongodb+srv://<username>:<password>@<network-address>/<dbname>?retryWrites=true&w=majority’
 ```
 
@@ -339,13 +339,13 @@ DB = ‘mongodb+srv://<username>:<password>@<network-address>/<dbname>?retryWrit
 
 __3.__ __Update the index.js to reflect the use of .env so that Node.js can connect to the database__.
 
-```bash
+```
 vim index.js
 ```
 
 Delete existing content in the file, and update it with the entire code below:
 
-```bash
+```
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -393,7 +393,7 @@ app.listen(port, () => {
 Using environment variables to store information is considered more secure and best practice to separate configuration and secret data from the application, instead of writing connection strings directly inside the index.js application file.
 
 __4.__ __Start your server using the command__
-```bash
+```
 node index.js
 ```
 There was a deprecation warning as diplayed in the image above.
@@ -410,7 +410,7 @@ In you security group on AWS, go to security group and add a custom TCP path for
 
 __1.__ __Open Postman and Set the header__
 
-```bash
+```
 http://yourip:5000/api/todos
 ```
 
@@ -438,20 +438,20 @@ It is time to create a user interface for a Web client (browser) to interact wit
 
 __1.__ __In the same root directory as your backend code, which is the Todo directory, run:__
 
-```bash
+```
 npx create-react-app client
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/10a1bda9a9bd2bf402f11569baf46c7076c7a832/MERN_Web-STACK/images/Screenshot%202024-09-17%20072822.png)
 
 or you can verbose it if is not installing 
 
-```bash
+```
 npx create-react-app client --verbose
 ```
 
 or you can also yarn it it is another form of installing it
 
-```bash
+```
 yarn create-react-app client 
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/10a1bda9a9bd2bf402f11569baf46c7076c7a832/MERN_Web-STACK/images/Screenshot%202024-09-17%20072907.png)
@@ -463,21 +463,21 @@ This created a new folder in the Todo directory called client, where all the rea
 Before testing the react app, the following dependencies needs to be installed in the project root directory.
 
 - __Install concurrently__. It is used to run more than one command simultaneously from the same terminal window.
-```bash
+```
 npm install concurrently --save-dev
 ```
 
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/10a1bda9a9bd2bf402f11569baf46c7076c7a832/MERN_Web-STACK/images/Screenshot%202024-09-17%20073759.png)
 
 - __Install nodemon__. It is used to run and monitor the server. If there is any change in the server code, nodemon will restart it automatically and load the new changes.
-```bash
+```
 npm install nodemon --save-dev
 ```
 
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/10a1bda9a9bd2bf402f11569baf46c7076c7a832/MERN_Web-STACK/images/Screenshot%202024-09-17%20074042.png)
 
 - In Todo folder open the package.json file, change the highlighted part of the below screenshot and replace with the code below:
-```bash
+```
 "scripts": {
   "start": "node index.js",
   "start-watch": "nodemon index.js",
@@ -489,19 +489,19 @@ npm install nodemon --save-dev
 ### Configure Proxy In package.json
 
 - Change directory to “client”
-```bash
+```
 cd client
 ```
 
 - Open the package.json file
-```bash
+```
 vim package.json
 ```
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/10a1bda9a9bd2bf402f11569baf46c7076c7a832/MERN_Web-STACK/images/Screenshot%202024-09-17%20080928.png)
 
 
 Add the key value pair in the package.json file
-```bash
+```
 “proxy”: “http://localhost:5000”
 ```
 
@@ -513,7 +513,7 @@ The whole purpose of adding the proxy configuration above is to make it possible
 http://locathost:5000 rather than always including the entire path like http://localhost:5000/api/todos
 
 Ensure you are inside the Todo directory, and simply do:
-```bash
+```
 npm run dev
 ```
 
@@ -530,32 +530,32 @@ __Note__: In order to access the application from the internet, TCP port 3000 ha
 
 One of the advantages of react is that it makes use of components, which are reusable and also makes code modular. For the Todo app, there are two stateful components and one stateless component. From Todo directory, run:
 
-```bash
+```
 cd client
 ```
 
 Move to the “src” directory
-```bash
+```
 cd src
 ```
 
 __2.__ __Inside your src folder, create another folder called “components”__
 
-```bash
+```
 mkdir components
 ```
 Move into the components directory
-```bash
+```
 cd components
 ```
 
 __3.__ __Inside the ‘components’ directory create three files “Input.js”, “ListTodo.js” and “Todo.js”.__
-```bash
+```
 touch Input.js ListTodo.js Todo.js
 ```
 
 #### Open Input.js file
-```bash
+```
 vim Input.js
 ```
 Paste in the following:
@@ -610,29 +610,29 @@ export default Input;
 In oder to make use of Axios, which is a Promise based HTTP client for the browser and node.js, you need to cd into your client from your terminal and run yarn add axios or npm install axios.
 
 Move to the client folder
-```bash
+```
 cd ../..
 ```
 __Install Axios__
-```bash
+```
 npm install axios
 ```
 
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/10a1bda9a9bd2bf402f11569baf46c7076c7a832/MERN_Web-STACK/images/Screenshot%202024-09-17%20085129.png)
 
 #### Go to components directory
-```bash
+```
 cd src/components
 ```
 
 #### After that open the ListTodo.js
 
-```bash
+```
 vim ListTodo.js
 ```
 Copy and paste the following code:
 
-```bash
+```
 import React from 'react';
 
 const ListTodo = ({ todos, deleteTodo }) => {
@@ -665,11 +665,11 @@ export default ListTodo;
 
 #### Then in the Todo.js file, write the following code
 
-```bash
+```
 vim Todo.js
 ```
 
-```bash
+```
 import React, { Component } from 'react';
 import axios from 'axios';
 
@@ -727,18 +727,18 @@ export default Todo;
 __We need to make a little adjustment to our react code. Delete the logo and adjust our App.js to look like this__
 
 ### Move to src folder
-```bash
+```
 cd ..
 ```
 
 Ensure to be in the src folder and run:
-```bash
+```
 vim App.js
 ```
 
 #### Copy and paste the following code
 
-```bash
+```
 import React from 'react';
 import Todo from './components/Todo';
 import './App.css';
@@ -757,13 +757,13 @@ export default App;
 
 ####  In the src directory, open the App.css
 
-```bash
+```
 vim App.css
 ```
 
 Paste the following code into it
 
-```bash
+```
 .App {
   text-align: center;
   font-size: calc(10px + 2vmin);
@@ -858,13 +858,13 @@ li {
 
 #### In the src directory, open the index.css
 
-```bash
+```
 vim index.css
 ```
 
 #### Copy and paste the code below:
 
-```bash
+```
 body {
   margin: 0;
   padding: 0;
@@ -882,12 +882,12 @@ code {
 ```
 
 #### Go to the Todo directory
-```bash
+```
 cd ../..
 ```
 
 Run:
-```bash
+```
 npm run dev
 ```
 
