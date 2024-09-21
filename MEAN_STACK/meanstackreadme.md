@@ -477,10 +477,3 @@ node server.js
 ![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/c0ce994beed544f325d8fc4a138910f2ee93fd8d/MEAN_STACK/images/Screenshot%202024-09-19%20185532.png)
 
 
-
-
-
-
-![image alt](
-![image alt](
-![image alt](
