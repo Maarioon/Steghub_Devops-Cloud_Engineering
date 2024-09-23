@@ -4,6 +4,8 @@ Client-side architecture is basically the way two computers, servers, applicatio
 
 In this context, the "client" is typically a user's web browser or an application that interacts with a server to request . It can also be said that two or more computers are connected together over a network to send and receive requests between one another.resources, display information, and perform user interactions. Here’s a breakdown of what client-side architecture involves
 
+Below is an example of a client server implememtation
+
 ![client-server example images](images/https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/8f47e9589de9c6e576b56fd09df7d3b66e8a037b/Client-Server-Architecture/images/Screenshot-2024-09-21-095055.png)
 
 
