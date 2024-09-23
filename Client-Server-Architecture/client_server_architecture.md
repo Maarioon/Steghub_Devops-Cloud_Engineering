@@ -154,7 +154,7 @@ show databases;
 ```
 ![show db](images/https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/8f47e9589de9c6e576b56fd09df7d3b66e8a037b/Client-Server-Architecture/images/Screenshot%202024-09-21%20155051.png)
 
-__Try to cretae something,create table, insert rows into table and select from the table__
+__Try to create something,create table, insert rows into table and select from the table__
 
 ```bash
 CREATE TABLE test_db.test_table (
