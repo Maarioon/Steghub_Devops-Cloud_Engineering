@@ -167,6 +167,14 @@ __13.__ __Mount ```/var/log``` on ```logs-lv``` logical volume (All existing dat
 ```
 sudo mount /dev/webdata-vg/logs-lv /var/log
 ```
+__8.__ __Use ```mkfs.ext4``` to format the logical volumes with ext4 filesystem and monut ```/db``` on ```db-lv```__
+
+```
+sudo mkfs.ext4 /dev/database-vg/db-lv
+```
+```
+sudo mount /dev/database-vg/db-lv /db
+```
 ![Mount logs-lv](./images/df-h-mounted.png)
 
 __14.__ __Restore log file back into ```/var/log``` directory__
@@ -182,7 +190,7 @@ sudo blkid   # To fetch the UUID
 
 sudo vi /etc/fstab
 ```
-![Update fstab](./images/vi-UUID.png)
+![Update fstab](./images/apps-UUID2.png)
 
 __16.__ __Test the configuration and reload daemon. Verify the setup__
 ```
@@ -194,40 +202,239 @@ df -h   # Verifies the setup
 ```
 ![Verify setup](./images/daemon-reload.png)
 
+
 ## Step 2 - Prepare the Database Server
 
 ### Launch a second RedHat EC2 instance that will have a role - ```DB Server```. Repeat the same steps as for the Web Server, but instead of ```apps-lv```, create ```dv-lv``` and mount it to ```/db``` directory.
+follow the same process for apps, server one, instaead of apps create a db aserver and create a db diirectory to save the server
 
-__1.__ __Create 3 volumes in the same AZ as the ```DB Server``` ec2 each of 10GB and attache all 3 volumes one by one to the DB Server__.
+![DB Server](./images/Screenshot 2024-09-24 170524.png)
 
-![Instance detail](./images/ec2-detail-db.png)
-![Instance detail](./images/security-rule-db.png)
-![DB volumes](./images/db-volume.png)
 
-__2.__ __Open up the Linux terminal to begin configuration__.
+## Step 3 - Install WordPress on the Web Server EC2
 
-```bash
-ssh -i "ec2key.pem" ec2-user@18.209.18.145
+__1.__ __Update the repository__
 ```
-![DB ssh](./images/ssh-db.png)
-
-__3.__ __Use ```lsblk``` to inspect what block devices are attached to the server. Their name will likely be ```xvdf```, ```xvdg``` and ```xvdh```__.
-
-```bash
-lsblk
-```
-![List Block](./images/lsblk-db.png)
-
-__4a.__ __Use ```gdisk``` utility to create a single partition on each of the 3 disks__.
-
-```bash
-sudo gdisk /dev/xvdf
-```
-![partition](./images/f-part-db.png)
-
-```bash
-sudo gdisk /dev/xvdg
+sudo yum -y update
 ```
 
+__2.__ __Install wget, Apache and it's dependencies__
+
+```
+sudo yum wget httpd php-fpm php-json
+```
+![Install Apache](./images/install-httpd.png)
+
+__3.__ __Install the latest version of PHP and it's dependencies using the Remi repository__
+
+#### Install the EPEL repository
+The package manager ```dnf``` was used here.
+It generally offers better performance and more efficient dependency resolution.
+```dnf``` is the modern, actively maintained package manager, while yum is older and gradually being phased out.
+
+#### The system version of the RHEL EC2 is version "9"
+
+```
+sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+```
+![Install Epel repo](./images/install-php.png)
+
+#### Install yum utils and enable remi-repository
+
+```
+sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm
+```
+![Install yum utils](./images/install-yum-utilities2.png)
+
+![Install yum utils](./images/install-yum-utilities.png)
+
+#### After the successful installation of yum-utils and Remi-packages, search for the PHP modules which are available for download by running the command.
+
+```
+sudo dnf module list php
+```
+![List PHP versions](./images/https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/42ec42efe46d2a2756b074fd4c2d64c9d8a990a5/web-solution-with-wordpress/images/Screenshot%202024-09-25%20172404.png)
+
+#### The output above indicates that if the currently installed version of PHP is PHP 8.1, there is need to install the newer release, PHP 8.2. Reset the PHP modules.
+
+```
+sudo dnf module reset php
+```
+![Reset PHP](./images/https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/42ec42efe46d2a2756b074fd4c2d64c9d8a990a5/web-solution-with-wordpress/images/Screenshot%202024-09-25%20172417.png)
+
+#### Having run reset, enable the PHP 8.2 module by running
+
+```
+sudo dnf module enable php:remi-8.2
+```
+![enable PHP](./images/Screenshot 2024-09-25 180155.png)
+
+![enable PHP](./images/enable-php2.png)
+
+#### Install PHP, PHP-FPM (FastCGI Process Manager) and associated PHP modules using the command.
+
+```
+sudo dnf install php php-opcache php-gd php-curl php-mysqlnd
+```
+![Install PHP](./images/install-php.png)
+
+#### To verify the version installed to run.
+
+```
+php -v
+```
+![PHP version](./images/install-php.png)
+
+#### Start, enable and check status of PHP-FPM on boot-up.
+
+```
+sudo systemctl start php-fpm
+sudo systemctl enable php-fpm
+sudo systemctl status php-fpm
+```
+![enable php-fpm](./images/enable-php2.png)
+
+__4.__ __Configure SELinux Policies__
+
+To instruct SELinux to allow Apache to execute the PHP code via PHP-FPM run.
+
+```
+sudo chown -R apache:apache /var/www/html
+sudo chcon -t httpd_sys_rw_content_t /var/www/html -R
+sudo setsebool -P httpd_execmem 1
+sudo setsebool -P httpd_can_network_connect=1
+sudo setsebool -P httpd_can_network_connect_db=1
+```
+![permissions](./images/https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/42ec42efe46d2a2756b074fd4c2d64c9d8a990a5/web-solution-with-wordpress/images/Screenshot%202024-09-25%20180553.png)
+
+####  Restart Apache web server for PHP to work with Apache web server.
+
+```
+sudo systemctl restart httpd
+```
+![Restart httpd](./images/restart-httpd.png)
+
+__5.__ __Download WordPress__
+
+Download wordpress and copy wordpress content to /var/www/html
+
+```
+sudo mkdir wordpress && cd wordpress
+sudo wget http://wordpress.org/latest.tar.gz
+sudo tar xzvf latest.tar.gz   # Extract wordpress
+```
+![Download wordpress](./images/wordpress-http-ta-file.png)
+
+#### After extraction, ```cd``` into the extracted ```wordpress``` and ```Copy``` the content of ```wp-config-sample.php``` to ```wp-config.php```.
+
+This will copy and create the file wp-config.php
+
+```
+cd wordpress/
+sudo cp -R wp-config-sample.php wp-config.php
+```
+![wp-config](./images/wordpress-http-ta-file.png)
+
+#### Exit from the extracted ```wordpress```. Copy the content of the extracted ```wordpress``` to ```/var/www/html```.
+
+```
+cd ..
+sudo cp -R wordpress/. /var/www/html/
+```
+
+![Cp /html](./images/cp-wordpress.png)
+
+![Cp /html](./images/wordpress-http-ta-file.png)
+
+
+__6.__ __Install MySQL on DB Server EC2__
+
+#### Update the EC2
+```
+sudo yum update -y
+```
+![Update RHEL](./images/update-rhel-db.png)
+
+#### Install MySQL Server
+```
+sudo yum install mysql-server -y
+```
+![install mysqlserver](./images/rpm-mysql.png)
+
+#### Verify that the service is up and running. If it is not running, restart the service and enable it so it will be running even after reboot.
+
+```
+sudo systemctl start mysqld
+sudo systemctl enable mysqld
+sudo systemctl status mysqld
+```
+![Start mysqld](./images/restart-mysql.png)
+
+#### Create database
+
+The user "wordpress" will be connecting to the database using the Web Server __private IP address__
+
+```
+sudo mysql -u root -p
+
+CREATE DATABASE wordpress_db;
+CREATE USER 'wordpress'@'172.31.31.27' IDENTIFIED WITH mysql_native_password BY 'Admin123$';
+GRANT ALL PRIVILEGES ON wordpress_db.* TO 'wordpress'@'172.31.31.27' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+show databases;
+exit
+```
+
+![Create db](./images/create-database.png)
+
+![show db](./images/show-database.png)
+
+#### Set the bind address
+
+The bind address is set to the ```private IP address of the DB Server``` for more security instead of to any IP address (0.0.0.0)
+
+```
+sudo vi /etc/my.cnf
+sudo systemctl restart mysqld
+```
+![bind address](./images/bind-address.png)
+
+#### Open ```wp-config.php``` file and edit the database information
+
+```
+cd /var/www/html
+sudo vi wp-config.php
+sudo systemctl restart httpd
+```
+
+![Open cofig](./images/www.conf-file.png)
+
+The ```private IP address``` of the DB Server is set as the ```DB_HOST``` because the DB Server and the Web Server resides in the same ```subnet``` which makes it possible for them to communicate directly. The private IP address is not an internet routable address.
+
+![Edit config](./images/www.conf-file.png)
+
+
+#### Connect to the DB Server from the Web Server
+
+```bash
+sudo mysql -h yourip -u wordpress -p
+
+show databases;
+exit;
+```
+![Web to DB](./images/wordpress-entry-page.png)
+
+
+#### Access the web page again with the Web Server public IP address and install wordpress on the browser
+
+![wp installed](./images/word-press-websirte.png)
+![wp login](./images/wordpress-login-page.png)
+![wp website](./images/wordpress-register-page.png)
+![wp website](./images/wordpress-website2.png)
+![wp website](./images/wordpress-website3.png)
+![wp website](./images/wordpress-webste2.png)
+
+
+## At this point, your fully built wordpress website is ready. the implementation of this project is complete and WordPress is available to be used.
 
 
