@@ -432,35 +432,201 @@ sudo mkdir /var/www
 sudo mount -t nfs -o rw,nosuid nfsip:/mnt/apps /var/www
 ```
 
+```
+sudo vi /etc/fstab
+```
+
+Add the following line
+```bash
+yournfsip:/mnt/apps /var/www nfs defaults 0 0
+```
 __4.__ __Verify that NFS was mounted successfully by running ```df -h```. Ensure that the changes will persist after reboot.__
 
-<!-- ![mount app](./images/mount-apps-web2.png) -->
+![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20152821.png)
+
+![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20153530.png)
+
+![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20153543.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20153554.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20154523.png)
+
+### Web Server 3
+
+__1.__ __Launch another new EC2 instance with RHEL Operating System__
+
+__2.__ __Install NFS Client__
+
+```
+sudo yum install nfs-utils nfs4-acl-tools -y
+```
+
+__3.__ __Mount ```/var/www/``` and target the NFS server's export for ```apps```__.
+NFS Server private IP address = 172.31.1.209
+
+```
+sudo mkdir /var/www
+sudo mount -t nfs -o rw,nosuid 172.31.1.209:/mnt/apps /var/www
+```
+
+__4.__ __Verify that NFS was mounted successfully by running ```df -h```. Ensure that the changes will persist after reboot.__
+
+```
+sudo vi /etc/fstab
+```
+
+Add the following line
+```
+172.31.1.209:/mnt/apps /var/www nfs defaults 0 0
+```
+
+__5.__ __Install Remi's repoeitory, Apache and PHP__
+
+```
+sudo yum install httpd -y
+```
+
+```
+sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+```
+
+```
+sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm
+```
+
+```
+sudo dnf module reset php
+```
+
+```
+sudo dnf module enable php:remi-8.2
+```
+
+```
+sudo dnf install php php-opcache php-gd php-curl php-mysqlnd
+```
+
+```
+sudo systemctl start php-fpm
+sudo systemctl enable php-fpm
+sudo systemctl status php-fpm
+sudo setsebool -P httpd_execmem 1
+```
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20165017.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20165055.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20170224.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20182722.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20182743.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20183116.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20183129.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20183201.png)
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20075212.png)
+
+__6.__ __Verify that Apache files and directories are availabel on the Web Servers in ```/var/www``` and also on the NFS Server in ```/mnt/apps```. If the same files are present in both, it means NFS was mounted correctly.__
+test.txt file was created from Web Server 1, and it was accessible from Web Server 2.
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-29%20152630.png)
 
 
-![image alt](
+__8.__ __Fork the tooling source code from ```StegHub GitHub Account```__
 
-![image alt](
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20101731.png)
+
+__9.__ __Deploy the tooling Website's code to the Web Server. Ensure that the ```html``` folder from the repository is deplyed to ```/var/www/html```__
+
+#### Install Git
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20101746.png)
+
+#### Initialize the directory and clone the tooling repository
+
+Ensure to clone the forked repository
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20103027.png)
+
+__Note__:
+Acces the website on a browser
+
+- Ensure TCP port 80 is open on the Web Server.
+- If ```403 Error``` occur, check permissions to the ```/var/www/html``` folder and also disable ```SELinux```
+  
+```
+sudo setenforce 0
+```
+To make the change permanent, open selinux file and set selinux to disable.
+
+```
+sudo vi /etc/sysconfig/selinux
+
+SELINUX=disabled
+
+sudo systemctl restart httpd
+```
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20114235.png)
+
+__10.__ __Update the website's configuration to connect to the database (in ```/var/www/html/function.php``` file). Apply ```tooling-db.sql``` command__
+```sudo mysql -h <db-private-IP> -u <db-username> -p <db-password < tooling-db.sql```
+
+```
+sudo vi /var/www/html/functions.php
+```
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20114235.png)
+
+```sql
+sudo mysql -h dbip -u webaccess -p tooling < tooling-db.sql
+```
+
+(![image alt](
+
+#### Access the database server from Web Server
+
+```sql
+sudo mysql -h dbip -u webaccess -p
+```
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20125830.png)
+
+__11.__ __Create in MyQSL a new admin user with username: ```myuser``` and password: ```password```__
+
+```sql
+INSERT INTO users(id, username, password, email, user_type, status) VALUES (2, 'myuser', '5f4dcc3b5aa765d61d8327deb882cf99', 'user@mail.com', 'admin', '1');
+```
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20130109.png)
+
+
+__12.__ __Open a browser and access the website using the Web Server public IP address ```http://<Web-Server-public-IP-address>/index.php```. Ensure login into the website with ```myuser``` user.__
+
+#### From Web Server 1
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20130310.png)
+
+### From Web Server 2
+
+__Disable SELinux__
+
+```
+sudo setenforce 0
+
+SELINUX=disabled
+```
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20131048.png)
+
+__Access the website__
+
+(![image alt](https://github.com/Maarioon/Steghub_Devops-Cloud_Engineering/blob/41cac3f832990ad83274145f220d9288bcc17372/DevOps-Tooling-Website-Solution-103/images/Screenshot%202024-09-30%20132909.png)
 
 
 
-![image alt](![image alt](![image alt](![image alt](![image alt](![image alt](
-
-![image alt](
-
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-![image alt](
-
-![image alt](
-
-![image alt](
-
-![image alt](
