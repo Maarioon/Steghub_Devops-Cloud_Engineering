@@ -119,8 +119,6 @@ sudo vi /etc/hosts
 
 by traffic balancing method will distribute incoming load between your Web Servers according to current traffic load. We can control in which proportion the traffic must be distributed by loadfactor parameter.
 
-![Screenshot 2024-10-05-062058](https://github.com/user-attachments/assets/7fc025df-25fc-4218-8e36-94736f6572fb)
-
 #### Accessing the LoadBlanacer Through Public Ips.
 
 ```
@@ -138,3 +136,17 @@ these credentials we're made in via sshing into the database
 ![Screenshot 2024-10-05-060940](https://github.com/user-attachments/assets/7c1b98b4-0cb6-4172-a674-c8fe484ced3b)
 
 
+### Try to curl the Web Servers from LB locally
+```bash
+curl http://local....
+```
+
+![Screenshot 2024-10-05-060824](https://github.com/user-attachments/assets/32dfc95f-9da9-4793-82b5-d49596d6dd76)
+![Screenshot 2024-10-05-060857](https://github.com/user-attachments/assets/8f285cb2-481f-4aab-806d-78e0321275d4)
+
+ and on the browser, final landing page
+
+ ![Screenshot 2024-10-05-61426](https://github.com/user-attachments/assets/8f1b6e44-277e-49ba-bd06-30f6b1c5ee91)
+
+ ### Conclusion
+This Load Balancer Solution with Apache ensures efficient traffic distribution and high availability for your web applications, providing a reliable infrastructure for seamless user experiences.
