@@ -415,10 +415,18 @@ Your updated with Ansible architecture now looks like this:
 ![Screenshot 2024-10-11 073846](https://github.com/user-attachments/assets/f290f1cd-9e53-41bb-99f6-0be0540009c1)
 ![Screenshot 2024-10-11 073941](https://github.com/user-attachments/assets/26f11c63-77fe-4168-b945-21fe30039d4a)
 
+Mmake sure the code ran successfully:
+
+![Screenshot 2024-10-14 053503](https://github.com/user-attachments/assets/63c66d98-fbd9-4852-ba16-c2deb9fe41b6)
+![Screenshot 2024-10-14 053433](https://github.com/user-attachments/assets/d7eb2ad0-f2b9-47dd-a997-8525e28b897a)
+
+
 ## Optional step - Repeat once again
 
 Update your ansible playbook with some new Ansible tasks and go through the full checkout -> change codes->commit -> PR -> merge -> build -> ansible-playbook cycle again to see how easily you can manage a servers fleet of any size with just one command!
 
 ![Screenshot 2024-10-11 103512](https://github.com/user-attachments/assets/9a96888e-92c7-4c2e-9ee9-1cebb47df726)
+
+
 
 We have just automated our routine tasks by implementing with Ansible configurations.
