@@ -1157,5 +1157,13 @@ Add the roles to your ansible configuration managenment project
 ![Screenshot 2024-11-21 192716](https://github.com/user-attachments/assets/55e82db9-b0da-491c-b408-fb1fa509923c)
 ![Screenshot 2024-11-21 192635](https://github.com/user-attachments/assets/99d24f0c-a2c8-4a0c-87bd-4c6d6237e99e)
 
+In the course of writing the project if you come accross errors like thi
+![Screenshot 2024-11-09 094857](https://github.com/user-attachments/assets/5ecf9258-d29a-4856-b558-511106a30013)
 
+If yoyu also come across composer installation errors, install the composer locally and comment out the composer install pat in jenkins file
+![Screenshot 2024-11-10 053157](https://github.com/user-attachments/assets/6dc162ff-487d-4e73-bade-69a6f66822f6)
 
+![Screenshot 2024-11-09 094846](https://github.com/user-attachments/assets/4270ceef-166d-4879-87fa-c2ab991b1bed)
+
+Make sure you check your key credential path and download SSH plugin, this would make the jnkins server automatically connect the pipeleine job, make sure you configure your credentials on the jenkins dashboard mahage jenkins global settings
+![Screenshot 2024-11-17 045427](https://github.com/user-attachments/assets/92784c12-d46b-4035-a051-9d8bb2d3876f)
