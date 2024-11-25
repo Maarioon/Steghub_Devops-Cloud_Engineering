@@ -487,6 +487,9 @@ let's Update our `/inventory/sit.yml file with the code below
         
         [db]
         <SIT-DB-Server-Private-IP-Address>
+
+![Screenshot 2024-11-04 084923](https://github.com/user-attachments/assets/4713985e-451f-4f25-ae88-b6fcd0bb5b3f)
+
 There are always several environments that need configuration, such as CI, site, and pentest environments etc. To manage and run these environments dynamically, we need to update the Jenkinsfile.
 
            parameters {
@@ -529,3 +532,24 @@ On you Jenkins server, install PHP, its dependencies and Composer tool (Feel fre
     php -v
     composer -v
 
+![Screenshot 2024-11-04 140337](https://github.com/user-attachments/assets/834d02d6-720d-470f-b6ff-96ff9c90d5b4)
+
+![Screenshot 2024-11-12 170150](https://github.com/user-attachments/assets/9ec9beb2-6d32-4733-b315-f0c8713673e9)
+
+Install the required jenkins plugin, which is plot and Artifactory plugins
+Plot Plugin Installation : We will use plot plugin to display tests reports, and code coverage informati
+![Screenshot 2024-11-04 140924](https://github.com/user-attachments/assets/42a0a949-5e43-4da4-92de-762856aec20a)
+![Screenshot 2024-11-04 140855](https://github.com/user-attachments/assets/44336283-a3b9-4df8-906f-90fd36faf68c)
+Artifactory Plugin Installation : The Artifactory plugin will be used to easily upload code artifacts into an Artifactory server.
+![Screenshot 2024-11-04 143548](https://github.com/user-attachments/assets/57a9947e-925d-4665-9923-15b59e49882a)
+![Screenshot 2024-11-04 143700](https://github.com/user-attachments/assets/d6cfa6d7-c091-4275-a30f-3f3c7d446066)
+Phase 2 – Set up Ansible roles for artifactory
+Create roles to install artifactory just the same way we set up apache, mysql and nginx in the previous project.
+artifactory
+and add the code below to static-assignments/artifactory.yml
+
+---
+- hosts: artifactory
+  roles:
+     - artifactory
+  become: true
