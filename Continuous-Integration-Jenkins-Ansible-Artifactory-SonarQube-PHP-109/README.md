@@ -1,4 +1,4 @@
-EXPERIENCE CONTINUOUS INTEGRATION WITH JENKINS | ANSIBLE | ARTIFACTORY | SONARQUBE | PHP
+![Screenshot 2024-11-21 191509](https://github.com/user-attachments/assets/f87cbb39-8ada-466a-a9c8-b065e9c9a5f4)EXPERIENCE CONTINUOUS INTEGRATION WITH JENKINS | ANSIBLE | ARTIFACTORY | SONARQUBE | PHP
 
 This project introduces foundational DevOps concepts to help you understand and implement an efficient CI/CD pipeline. It emphasizes the importance of understanding CI/CD workflows, tools, and success metrics before diving into hands-on activities.
 
@@ -842,6 +842,9 @@ Update and upgrade system packages
 Install wget and unzip packages
 
       sudo apt-get install wget unzip -y
+![Screenshot 2024-11-19 154351](https://github.com/user-attachments/assets/0b530cb5-4d52-4242-bc05-4991a3d2568d)
+![Screenshot 2024-11-19 154329](https://github.com/user-attachments/assets/82ecf632-6383-442c-81c2-adb0149647fa)
+
 Install OpenJDK and Java Runtime Environment (JRE) 11
 
       sudo apt-get install openjdk-11-jdk -y
@@ -854,6 +857,11 @@ select your java from the list, that is if you already have mutiple installation
 Verify the set JAVA Version:
 
       java -version
+  ![Screenshot 2024-11-19 154418](https://github.com/user-attachments/assets/14c6ee48-dbf4-4069-994a-0a5e12a30748)
+![Screenshot 2024-11-19 154433](https://github.com/user-attachments/assets/d8466002-841d-4bf9-b2fe-65bef1dfa7e5)
+![Screenshot 2024-11-19 154514](https://github.com/user-attachments/assets/75a2ec4a-940f-4079-9b93-5ab21f2ad303)
+![Screenshot 2024-11-19 155008](https://github.com/user-attachments/assets/ea2211bc-f69a-4b9b-8244-f37f5f5518be)
+
 Install and Setup PostgreSQL 10 Database for SonarQube
 PostgreSQL repo to the repo list:
 
@@ -874,3 +882,280 @@ Set up User and password for postgres
 Switch to the postgres user
 
  su - postgres
+![Screenshot 2024-11-19 155106](https://github.com/user-attachments/assets/d627e484-d982-470a-a0d5-0645502c48e8)
+![Screenshot 2024-11-19 155121](https://github.com/user-attachments/assets/ef51924c-c473-4cbc-b788-ca71c2792b58)
+![Screenshot 2024-11-19 155155](https://github.com/user-attachments/assets/0ea845ac-60e3-494b-bcea-7a9409eb2bc5)
+![Screenshot 2024-11-19 155253](https://github.com/user-attachments/assets/ef34625e-f4e4-4bf5-98ac-513a1aec4cc7)
+![Screenshot 2024-11-19 155841](https://github.com/user-attachments/assets/5d62ac19-22ec-49a3-832b-e7839667b73d)
+Now, to start SonarQube we need to do following:
+
+-Switch to sonar user
+
+        sudo su sonar
+Move to the script directory
+
+          cd /opt/sonarqube/bin/linux-x86-64/
+Run the script to start SonarQube ,
+
+    ./sonar.sh start
+and Check SonarQube running status:
+
+    ./sonar.sh status
+![Screenshot 2024-11-19 160629](https://github.com/user-attachments/assets/dae99269-31ef-4d64-b191-fa88d7018da9)
+![Screenshot 2024-11-19 160640](https://github.com/user-attachments/assets/6d596cc2-0ff2-4da4-ac41-d9d6db5cb9b9)
+![Screenshot 2024-11-19 160726](https://github.com/user-attachments/assets/f9c45f91-b8a6-4b6a-b6ab-748984ec7bbd)
+![Screenshot 2024-11-19 160744](https://github.com/user-attachments/assets/02fe95c4-8958-4598-8670-946b894581a0)
+![Screenshot 2024-11-19 161129](https://github.com/user-attachments/assets/0977d7f3-78bf-4fa6-868a-e8806a90e55e)
+![Screenshot 2024-11-19 161602](https://github.com/user-attachments/assets/12a81b11-fb71-44e3-84c0-38b3d2c473f0)
+Configure SonarQube to run as a systemd service, To do this, Stop the currently running SonarQube service
+
+                ./sonar.sh stop
+Create a systemd service file for SonarQube to run as System Startup.
+
+                 sudo nano /etc/systemd/system/sonar.service
+Add the configuration below for systemd to determine how to start, stop, check status, or restart the SonarQube service.
+
+                  [Unit]
+               Description=SonarQube service
+               After=syslog.target network.target
+               
+               [Service]
+               Type=forking
+               
+               ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+               ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+               
+               User=sonar
+               Group=sonar
+               Restart=always
+               
+               LimitNOFILE=65536
+               LimitNPROC=4096
+               
+               [Install]
+               WantedBy=multi-user.target
+Save exit. now you can go ahead and control the service using systemctl
+
+              sudo systemctl start sonar
+            sudo systemctl enable sonar
+            sudo systemctl status sonar
+![Screenshot 2024-11-19 161941](https://github.com/user-attachments/assets/3be85e27-6d09-4f9c-9ebb-d65fc76d88d0)
+![Screenshot 2024-11-19 161956](https://github.com/user-attachments/assets/f028720e-5d62-49f1-9dc2-23c2a1d7de92)
+![Screenshot 2024-11-19 162144](https://github.com/user-attachments/assets/15ae1802-307e-4f0c-b8e1-8cc65e97564f)
+![Screenshot 2024-11-19 185545](https://github.com/user-attachments/assets/7c048233-a64e-40f7-bac8-404b0d7908a1)
+![Screenshot 2024-11-20 085459](https://github.com/user-attachments/assets/1f6b48af-3fd4-4e62-b202-a36b01dee022)
+![Screenshot 2024-11-20 085528](https://github.com/user-attachments/assets/51ac8287-1a3e-4c36-bd42-62dcb4aa9b0b)
+![Screenshot 2024-11-20 090003](https://github.com/user-attachments/assets/ae46c89a-7516-4d34-bf45-646dc8efeadc)
+Visit sonarqube config file and uncomment the line of sonar.web.port=9000
+
+    sudo nano /opt/sonarqube/conf/sonar.properties
+Open port 9000 in your security group for the sonarqube server and access your :9000
+![Screenshot 2024-11-20 090600](https://github.com/user-attachments/assets/75e17b07-cc33-43a6-9957-2da2061218ff)
+![Screenshot 2024-11-20 090548](https://github.com/user-attachments/assets/5d7a1049-adce-4a82-8502-2021e0a43c17)
+![Screenshot 2024-11-20 095115](https://github.com/user-attachments/assets/0c0bdd6e-40df-44df-8de4-52bfb714e14b)
+![Screenshot 2024-11-20 091312](https://github.com/user-attachments/assets/a5a6d9ff-f13f-4dcb-a167-ce611d014946)
+![Screenshot 2024-11-20 094024](https://github.com/user-attachments/assets/5ef18b89-4b49-49c4-bba9-649501d0ba3b)
+![Screenshot 2024-11-20 095105](https://github.com/user-attachments/assets/cf0c155c-57db-46be-a5ad-74fdd27694ba)
+
+Configure SonarQube and Jenkins For Quality Gate :
+In jenkins , install the sonarqubescanner plugin
+
+Go to jenkins global configuration and add sonarqube server as shown below
+![Screenshot 2024-11-20 143944](https://github.com/user-attachments/assets/3839292a-d2ba-44b3-b5e2-e874fdb20304)
+Generate authentication token in SonarQube by User > My Account > Security > Generate Tokens
+![Screenshot 2024-11-20 121803](https://github.com/user-attachments/assets/8101690c-e76d-4e1c-bd6b-d85b41e05841)
+![Screenshot 2024-11-20 121907](https://github.com/user-attachments/assets/ecb4e18a-f4f7-49a3-976e-ddd26235a09f)
+![Screenshot 2024-11-20 121931](https://github.com/user-attachments/assets/253fb5c8-9d08-469c-9a77-68f7c4598fd4)
+
+sonatoken
+![Screenshot 2024-11-20 132606](https://github.com/user-attachments/assets/7239c5bd-a446-45ca-a4f5-def444956f8d)
+
+Configure Quality Gate Jenkins Webhook in SonarQube – The URL should point to your Jenkins server http://{JENKINS_HOST}/sonarqube-webhook/ , go to Administration > Configuration > Webhooks > Create
+![Screenshot 2024-11-20 140332](https://github.com/user-attachments/assets/beebdf8c-59f0-4d6c-a2c5-4f7b92846764)
+
+qualitygate
+![Screenshot 2024-11-20 140355](https://github.com/user-attachments/assets/76d23b58-31d0-4f4e-b61a-58f65a0b9a81)
+
+Setup SonarQube scanner from Jenkins – Global Tool Configuration
+
+sonartool
+Update Jenkins Pipeline to include SonarQube scanning and Quality Gate and run Jenkinsfile
+
+    stage('SonarQube Quality Gate') {
+          environment {
+              scannerHome = tool 'SonarQubeScanner'
+          }
+          steps {
+              withSonarQubeEnv('sonarqube') {
+                  sh "${scannerHome}/bin/sonar-scanner"
+              }
+  
+          }
+      }
+
+NOTE: The above step will fail because we have not updated `sonar-scanner.properties Configure SonarQube in Jenkins:
+![Screenshot 2024-11-20 140825](https://github.com/user-attachments/assets/54d4de03-7399-48bb-8b37-919aeb181c6e)
+
+Go to Jenkins Dashboard → Manage Jenkins → Configure System. Scroll down to the SonarQube Servers section. Click Add SonarQube. Name: Give it a name (e.g., sonarqube). Server URL: Enter the SonarQube server URL (e.g., http://:9000). Server Authentication Token: If your SonarQube server requires authentication, provide a token from SonarQube (you can create one under User Settings → Security → Tokens in SonarQube). Click Apply or Save. Configure SonarQube Scanner in Jenkins:
+
+Go to Jenkins Dashboard → Manage Jenkins → Global Tool Configuration. Scroll down to SonarQube Scanner. Click Add SonarQube Scanner and provide the details: Name: Set a name for this scanner installation (e.g., SonarQubeScanner). Install automatically: You can check this if you want Jenkins to automatically install the latest version. SonarQube Scanner Executable: If you want to provide a specific scanner executable, you can set the path here. Click Apply or Save
+
+Configure sonar-scanner.properties - From the step above, Jenkins will install the scanner tool on the Linux server. You will need to go into the tools directory on the server to configure the properties file in which SonarQube will require to function during pipeline execution.
+![Screenshot 2024-11-20 153028](https://github.com/user-attachments/assets/545825fc-4bd3-4f25-a291-0c8e4c629b4c)
+  cd /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/conf/
+Open sonar-scanner.properties file
+
+  sudo vi sonar-scanner.properties
+Add configuration related to php-todo project
+![Screenshot 2024-11-21 104832](https://github.com/user-attachments/assets/79823be0-6422-4670-ac75-2410691071f5)
+
+  sonar.host.url=http://<SonarQube-Server-IP-address>:9000
+  sonar.projectKey=php-todo
+  #----- Default source code encoding
+  sonar.sourceEncoding=UTF-8
+  sonar.php.exclusions=**/vendor/**
+  sonar.php.coverage.reportPaths=build/logs/clover.xml
+  sonar.php.tests.reportPath=build/logs/junit.xml
+HINT: To know what exactly to put inside the sonar-scanner.properties file, SonarQube has a configurations page where you can get some directions.
+![Screenshot 2024-11-21 104802](https://github.com/user-attachments/assets/732013ff-baf8-493b-92a7-23eb7363767e)
+
+To further examine the configuration of the scanner tool on the Jenkins server - navigate into the tools directory
+
+                    cd /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin
+List the content to see the scanner tool sonar-scanner. That is what we are calling in the pipeline script.
+![Screenshot 2024-11-21 171912](https://github.com/user-attachments/assets/9466c660-77b1-4594-b780-682df7090d4c)
+
+   ls -latr
+
+![Screenshot 2024-11-20 143944](https://github.com/user-attachments/assets/24b85381-1a43-49eb-942b-aca3dd8ccc71)
+Run your pipeline script and View the Quailty gate for the Php-Todo app in Sonarqube
+![Screenshot 2024-11-21 173717](https://github.com/user-attachments/assets/62167c02-71f0-4422-a8c8-0f867cdc8049)
+
+deploy
+
+But we are not completely done yet!
+
+The quality gate we just included has no effect. Why? Well, because if you go to the SonarQube UI, you will realise that we just pushed a poor-quality code onto the development environment.
+
+sonarbudg
+![Screenshot 2024-11-21 173736](https://github.com/user-attachments/assets/12a5e478-b293-419e-bcfd-f14f10211531)
+
+Navigate to php-todo project in SonarQube
+
+There are bugs, and there is 0.0% code coverage. (code coverage is a percentage of unit tests added by developers to test functions and objects in the code)
+
+If you click on php-todo project for further analysis, you will see that there is 6 hours' worth of technical debt, code smells and security issues in the code.
+![Screenshot 2024-11-21 173830](https://github.com/user-attachments/assets/e69f1c40-4005-47df-a7f2-8ce3431c1831)
+
+In the development environment, this is acceptable as developers will need to keep iterating over their code towards perfection. But as a DevOps engineer working on the pipeline, we must ensure that the quality gate step causes the pipeline to fail if the conditions for quality are not met.
+
+Conditionally deploy to higher environments
+In the real world, developers will work on feature branch in a repository (e.g., GitHub or GitLab). There are other branches that will be used differently to control how software releases are done. You will see such branches as:
+
+Develop
+
+Master or Main (The * is a place holder for a version number, Jira Ticket name or some description. It can be something like Release-1.0.0)
+
+Feature/*
+
+Release/*
+
+Hotfix/*
+
+etc.
+
+There is a very wide discussion around release strategy, and git branching strategies which in recent years are considered under what is known as GitFlow (Have a read and keep as a bookmark - it is a possible candidate for an interview discussion, so take it seriously!)
+
+Assuming a basic gitflow implementation restricts only the develop branch to deploy code to Integration environment like sit.
+
+Let us update our Jenkinsfile to implement this:
+
+First, we will include a When condition to run Quality Gate whenever the running branch is either develop, hotfix, release, main, or master
+
+  when { branch pattern: "^develop*|^hotfix*|^release*|^main*", comparator: "REGEXP"}
+Then we add a timeout step to wait for SonarQube to complete analysis and successfully finish the pipeline only when code quality is acceptable.
+
+timeout(time: 1, unit: 'MINUTES') {
+      waitForQualityGate abortPipeline: true
+  }
+The complete stage will now look like this:
+
+  stage('SonarQube Quality Gate') {
+    when { branch pattern: "^develop*|^hotfix*|^release*|^main*", comparator: "REGEXP"}
+      environment {
+          scannerHome = tool 'SonarQubeScanner'
+      }
+      steps {
+          withSonarQubeEnv('sonarqube') {
+              sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-project.properties"
+          }
+          timeout(time: 1, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+          }
+      }
+  }
+To test, create different branches and push to GitHub. You will realise that only branches other than develop, hotfix, release, main, or master will be able to deploy the code.
+![Screenshot 2024-11-21 174025](https://github.com/user-attachments/assets/2d949e71-95b4-4917-bc66-d0714b76dbf6)
+
+If everything goes well, you should be able to see something like this:
+![Screenshot 2024-11-21 174341](https://github.com/user-attachments/assets/56a5bbca-7a77-415e-941b-12a2fb0c8296)
+
+Notice that with the current state of the code, it cannot be deployed to Integration environments due to its quality. In the real world, DevOps engineers will push this back to developers to work on the code further, based on SonarQube quality report. Once everything is good with code quality, the pipeline will pass and proceed with sipping the codes further to a higher environment.
+
+Introduce Jenkins agents/slaves
+Jenkins architecture is fundamentally "Master+Agent". The master is designed to do co-ordination and provide the GUI and API endpoints, and the Agents are designed to perform the work. The reason being that workloads are often best "farmed out" to distributed servers.
+
+Let's add 2 more servers to be used as Jenkins slave. Launch 2 more instances for Jenkins slave and install java in them
+
+                  # install  java on slave nodes
+                    sudo yum install java-11-openjdk-devel -y
+                    
+                    #verify Java is installed
+                    java --version
+Configure Jenkins to run its pipeline jobs randomly on any available slave nodes. Let's Configure the new nodes on Jenkins Server. Navigate to Dashboard > Manage Jenkins > Nodes, click on New node and enter a Name and click on create.
+
+To connect to slave_one, click on the slave_one and completed this fields and save.
+
+Name: nodeA
+Remote root directory: /opt/build (This can be any directory for the builds)
+Labels: nodeA and save
+Click back on Slave_one to configure and navigate to status
+Use any options. But since i am making use of a UNIX system ,I would use the first option.
+In the Slave_one terminal, enter the following
+
+ sudo mkdir /opt/build
+  sudo chmod 777 /opt/build
+      curl -sO http://54.197.201.140:8080/jnlpJars/agent.jar
+      java -jar agent.jar -url http://54.197.201.140:8080/ -secret 4899020e167af2a29a6f2cd5c7153d400190c7516929d4d6177111d9f14ccc50 -name                nodeA -workDir "/opt/build "
+Go to dashboard > manage jenkins > security > Agents
+
+Set the TCP port for inbound agents to fixed and set the port at 5000 ( or any one you choose )
+![Screenshot 2024-11-21 181809](https://github.com/user-attachments/assets/72bac050-e2cf-430b-b03b-b61a43a53c6e)
+![Screenshot 2024-11-21 180755](https://github.com/user-attachments/assets/5e3e3819-c747-4b9d-b6a2-ff476c34c9e2)
+
+Go to the security group on jenkins ec2 instance and open port 5000
+
+go back to slave terminal and run the command
+
+Verify that slave is connected in jenkins
+![Screenshot 2024-11-21 185804](https://github.com/user-attachments/assets/e8274e8b-dafd-4eb5-b0a9-e787bbccb805)
+![Screenshot 2024-11-21 190432](https://github.com/user-attachments/assets/ff5ccc68-a7a8-461c-9dd7-6388efc629ed)
+
+Optional Step
+Using ansible roles, Install wireshark in the pentest env server. here are a list of ansible roles you could use :
+
+https://github.com/ymajik/ansible-role-wireshark (Ubuntu)
+
+https://github.com/wtanaka/ansible-role-wireshark (RedHat)
+
+Add the roles to your ansible configuration managenment project
+
+(https://github.com/user-attachments/assets/727b99d4-5d3a-427a-9ac5-1a67a7a4f646)
+91509.png…]()
+![Screenshot 2024-11-21 191340](https://github.com/user-attachments/assets/027a89c8-e65b-45fe-877a-b4ec38bd1251)
+
+![Screenshot 2024-11-21 192716](https://github.com/user-attachments/assets/55e82db9-b0da-491c-b408-fb1fa509923c)
+![Screenshot 2024-11-21 192635](https://github.com/user-attachments/assets/99d24f0c-a2c8-4a0c-87bd-4c6d6237e99e)
+
+
+
