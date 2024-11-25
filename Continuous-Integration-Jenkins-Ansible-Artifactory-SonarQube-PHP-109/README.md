@@ -553,3 +553,324 @@ and add the code below to static-assignments/artifactory.yml
   roles:
      - artifactory
   become: true
+![Screenshot 2024-11-17 090843](https://github.com/user-attachments/assets/d9f6cea0-3500-442f-ace8-18b48e4a2c0f)
+![Screenshot 2024-11-17 090858](https://github.com/user-attachments/assets/8abe6d68-a383-4536-8726-fe8dda6e69ca)
+
+Configure Artifactory plugin by going to manage jenkins > system configurations, scroll down to jfrog and click on add instance
+
+Input the ID, artifactory url , username and password
+
+Click on test connection to test your url
+
+Visit your <your-artifactory-ip-address:8081
+
+Sign in using the default artifactory credentials : admin and password
+
+![Screenshot 2024-11-17 093128](https://github.com/user-attachments/assets/795f9c18-f6bd-4afa-8bb9-00a0b5357c25)
+Create a local repository and call it todo-dev-local, set the repository type to generic
+
+![Screenshot 2024-11-19 090142](https://github.com/user-attachments/assets/d584b83d-2c9b-4761-b879-804eefdebec9)
+
+Update the database configuration in roles/mysql/vars/main.yml to create a new database and user for the Todo App. use the details below :
+
+          Create database homestead;
+          CREATE USER 'homestead'@'%' IDENTIFIED BY 'sePret^i';
+          GRANT ALL PRIVILEGES ON * . * TO 'homestead'@'%';
+![Screenshot 2024-11-09 022957](https://github.com/user-attachments/assets/86ddb3cc-b4b3-4762-844f-5b565cc9b124)
+
+Create a Multibranch pipeline for the Php Todo App.
+o![Screenshot 2024-11-09 042215](https://github.com/user-attachments/assets/d2205605-84dd-49aa-822d-b6b5f0812a77)
+Create a .env.sample file and update it with the credentials to connect the database, use sample the code below :
+                DB_HOST=172.31.24.250
+                DB_DATABASE=homestead
+                DB_USERNAME=homestead
+                DB_PASSWORD=sePret^i
+
+![Screenshot 2024-11-09 022957](https://github.com/user-attachments/assets/ea98667f-66a5-488e-bede-05133716c17d)
+![Screenshot 2024-11-09 035615](https://github.com/user-attachments/assets/3926ab38-83cb-4bbd-8d81-6815842d5520)
+install mysql client on jenkins server
+                    sudo yum install mysql -y 
+Update Jenkinsfile with proper pipeline configuration pipeline { agent any
+ stages {
+                 
+                      stage("Initial cleanup") {
+                           steps {
+                             dir("${WORKSPACE}") {
+                               deleteDir()
+                             }
+                           }
+                         }
+                   
+                     stage('Checkout SCM') {
+                       steps {
+                             git branch: 'main', url: 'https://github.com/William-eng/php-todo.git'
+                       }
+                     }
+                 
+                     stage('Prepare Dependencies') {
+                       steps {
+                              sh 'mv .env.sample .env'
+                              sh 'composer install'
+                              sh 'php artisan migrate'
+                              sh 'php artisan db:seed'
+                              sh 'php artisan key:generate'
+                       }
+                     }
+                   }
+                 }
+Ensure that all neccesary php extensions are already installed .
+
+Run the pipeline build , you will notice that the database has been populated with tables using a method in laravel known as migration and seeding.
+![Screenshot 2024-![Screenshot 2024-11-18 075134](https://github.com/user-attachments/assets/275b305c-9a8c-480a-9af3-7e29d3e0da1f)
+11-09 043514](https://github.com/user-attachments/assets/dcc1b6b7-4405-4eee-969d-c8f95f9bc785)
+  #!/bin/bash
+
+      # Variables for versions
+      PHPUNIT_VERSION="9.5.10"
+      PHPLOC_VERSION="6.0.0"
+      
+      # Download and install PHPUnit
+      echo "Downloading PHPUnit..."
+      wget -O phpunit.phar https://phar.phpunit.de/phpunit-${PHPUNIT_VERSION}.phar
+      
+      echo "Making PHPUnit executable..."
+      chmod +x phpunit.phar
+      
+      echo "Moving PHPUnit to /usr/local/bin..."
+      sudo mv phpunit.phar /usr/local/bin/phpunit
+      
+      echo "Checking PHPUnit version..."
+      phpunit --version
+      
+      # Download and install PHPLoc
+      echo "Downloading PHPLoc..."
+      wget -O phploc.phar https://phar.phpunit.de/phploc-${PHPLOC_VERSION}.phar
+      
+      echo "Making PHPLoc executable..."
+      chmod +x phploc.phar
+      
+      echo "Moving PHPLoc to /usr/local/bin..."
+      sudo mv phploc.phar /usr/local/bin/phploc
+      
+      echo "Checking PHPLoc version..."
+      phploc --version
+      
+      echo "Installation of PHPUnit and PHPLoc completed successfully!"
+Update the Jenkinsfile to include Unit tests step
+
+                   stage('Execute Unit Tests') {
+                steps {
+                       sh './vendor/bin/phpunit'
+                }
+Phase 3 – Code Quality Analysis
+This is one of the areas where developers, architects and many stakeholders are mostly interested in as far as product development is concerned. For PHP the most commonly tool used for code quality analysis is phploc.
+
+The data produced by phploc can be ploted onto graphs in Jenkins.
+
+To implement this, add the flow code snippet. The output of the data will be saved in build/logs/phploc.csv file.
+
+                  stage('Code Analysis') {
+                    steps {
+                          sh 'phploc app/ --log-csv build/logs/phploc.csv'
+                  
+                    }
+                  }
+This plugin provides generic plotting (or graphing) capabilities in Jenkins. It will plot one or more single values variations across builds in one or more plots. Plots for a particular job (or project) are configured in the job configuration screen, where each field has additional help information. Each plot can have one or more lines (called data series). After each build completes the plots’ data series latest values are pulled from the CSV file generated by phploc.
+
+Plot the data using plot Jenkins plugin. This plugin provides generic plotting (or graphing) capabilities in Jenkins. It will plot one or more single values variations across builds in one or more plots. Plots for a particular job (or project) are configured in the job configuration screen, where each field has additional help information. Each plot can have one or more lines (called data series). After each build completes the plots' data series latest values are pulled from the CSV file generated by phploc.
+
+  pipeline {
+      agent any
+  
+      stages {
+          stage('Code Analysis') {
+              steps {
+                  // Running PHPLoc for code analysis
+                  sh 'phploc app/ --log-csv build/logs/phploc.csv'
+              }
+          }
+  
+  
+          stage('Plot Code Coverage Report') {
+              steps {
+                  script {
+                      // Plotting code metrics using the generated CSV from PHPLoc
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Lines of Code (LOC),Comment Lines of Code (CLOC),Non-Comment Lines of Code (NCLOC),Logical Lines of Code (LLOC)', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'A - Lines of code', yaxis: 'Lines of Code'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Directories,Files,Namespaces', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'B - Structures Containers', yaxis: 'Count'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Average Class Length (LLOC),Average Method Length (LLOC),Average Function Length (LLOC)', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'C - Average Length', yaxis: 'Average Lines of Code'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Cyclomatic Complexity / Lines of Code,Cyclomatic Complexity / Number of Methods ', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'D - Relative Cyclomatic Complexity', yaxis: 'Cyclomatic Complexity by Structure'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Classes,Abstract Classes,Concrete Classes', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'E - Types of Classes', yaxis: 'Count'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Methods,Non-Static Methods,Static Methods,Public Methods,Non-Public Methods', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'F - Types of Methods', yaxis: 'Count'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Constants,Global Constants,Class Constants', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'G - Types of Constants', yaxis: 'Count'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Test Classes,Test Methods', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'I - Testing', yaxis: 'Count'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Logical Lines of Code (LLOC),Classes Length (LLOC),Functions Length (LLOC),LLOC outside functions or classes ', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'AB - Code Structure by Logical Lines of Code', yaxis: 'Logical Lines of Code'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Functions,Named Functions,Anonymous Functions', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'H - Types of Functions', yaxis: 'Count'
+  
+                      plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', 
+                           csvSeries: [[displayTableFlag: false, exclusionValues: 'Interfaces,Traits,Classes,Methods,Functions,Constants', 
+                                        file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], 
+                           group: 'phploc', numBuilds: '100', style: 'line', title: 'BB - Structure Objects', yaxis: 'Count'
+                  }
+              }
+          }
+      }
+  
+     
+      }
+  }
+![Screenshot 2024-11-19 054319](https://github.com/user-attachments/assets/7e8dd265-a499-4671-a054-aa96397fa1a2)
+![Screenshot 2024-11-19 080828](https://github.com/user-attachments/assets/63e4d42c-19e0-4db5-b1b2-75b07f115893)
+![Screenshot 2024-11-19 080841](https://github.com/user-attachments/assets/b9d9affc-d015-4d52-aefa-6161859729ed)
+
+Phase 4 – Bundle and deploy :
+Bundle the todo application code into an artifact and upload to jfrog artifactory. to do this, we have to add a stage to our todo jenkinsfile to save ethe artifact as a zip file, to do this : * Edit your php-todo/Jenkinsfile , add the code below
+
+                                   stage('Package Artifact') {
+                                 steps {
+                                     sh 'zip -qr php-todo.zip ${WORKSPACE}/*'
+                                 }
+                             }
+Add another stage to upload the zipped artifact into our already configured artifactory repository.
+
+                       stage('Upload Artifact to Artifactory') {
+                        steps {
+                            script {
+                                def server = Artifactory.server 'artifactory-server'
+                                def uploadSpec = """{
+                                    "files": [
+                                    {
+                                        "pattern": "php-todo.zip",
+                                        "target": "Todo-dev/php-todo.zip",
+                                        "props": "type=zip;status=ready"
+                                    }
+                                    ]
+                                }"""
+                                println "Upload Spec: ${uploadSpec}"
+                                try {
+                                    server.upload spec: uploadSpec
+                                    println "Upload successful"
+                                } catch (Exception e) {
+                                    println "Upload failed: ${e.message}"
+                                }
+                            }
+                        }
+                    }
+Deploy the application to the dev envionment : todo server by launching the ansible playbook.
+
+                       stage('Deploy to Dev Environment') {
+                       steps {
+                           build job: 'ansibllle-config-mgt/main', parameters: [[$class: 'StringParameterValue', name: 'inventory', value: 'dev']], propagate: false, wait: true
+                       }
+                   }
+               }
+
+![Screenshot 2024-11-19 085940](https://github.com/user-attachments/assets/2319622b-35fc-4cc9-a35a-46439de337e6)
+
+![Screenshot 2024-11-19 090020](https://github.com/user-attachments/assets/b3b634be-90a4-40d2-acd9-429e3be4951f)
+![Screenshot 2024-11-19 083958](https://github.com/user-attachments/assets/398713bc-f7cb-4666-a195-2c5f236098ac)
+![Screenshot 2024-11-19 084013](https://github.com/user-attachments/assets/63ff4e12-2120-42c4-b381-437f1c8358b1)
+![Screenshot 2024-11-19 085836](https://github.com/user-attachments/assets/4f04c4b1-f177-42c6-9ace-8bac79827d9a)
+![Screenshot 2024-11-19 085940](https://github.com/user-attachments/assets/61ba47b4-dff0-4d2f-ad30-a5f987b712a5)
+![Screenshot 2024-11-19 090142](https://github.com/user-attachments/assets/c51a2f65-e4b4-4749-91ea-d73c529675ef)
+
+The build job used in this step tells Jenkins to start another job. In this case it is the ansible-project job, and we are targeting the main branch. Hence, we have ansible-project/main. Since the Ansible project requires parameters to be passed in, we have included this by specifying the parameters section. The name of the parameter is env and its value is dev. Meaning, deploy to the Development environment.
+
+But how are we certain that the code being deployed has the quality that meets corporate and customer requirements? Even though we have implemented Unit Tests and Code Coverage Analysis with phpunit and phploc, we still need to implement Quality Gate to ensure that ONLY code with the required code coverage, and other quality standards make it through to the environments.
+
+To achieve this, we need to configure SonarQube - An open-source platform developed by SonarSource for continuous inspection of code quality to perform automatic reviews with static analysis of code to detect bugs, code smells, and security vulnerabilities.
+
+SonarQube Installation
+SonarQube is a tool that can be used to create quality gates for software projects, and the ultimate goal is to be able to ship only quality software code.
+
+Install SonarQube on Ubuntu 20.04 With PostgreSQL as Backend Database
+SonarQube is a tool that can be used to create quality gates for software projects, and the ultimate goal is to be able to ship only quality software code.
+
+steps to Install SonarQube on Ubuntu 24.04 With PostgreSQL as Backend Database
+First thing we need to do is to tune linux to ensure optimum performance
+
+   sudo sysctl -w vm.max_map_count=262144
+   sudo sysctl -w fs.file-max=65536
+   ulimit -n 65536
+   ulimit -u 4096
+Ensure a permanent change by editing the /etc/security/limits.conf , add the code below into it
+
+      sonarqube   -   nofile   65536
+    sonarqube   -   nproc    4096
+Update and upgrade system packages
+
+      sudo apt-get update
+    sudo apt-get upgrade
+Install wget and unzip packages
+
+      sudo apt-get install wget unzip -y
+Install OpenJDK and Java Runtime Environment (JRE) 11
+
+      sudo apt-get install openjdk-11-jdk -y
+     sudo apt-get install openjdk-11-jre -y
+Set default JDK - To set default JDK or switch to OpenJDK, to achieve this , use the command below :
+
+       sudo update-alternatives --config java
+select your java from the list, that is if you already have mutiple installations of diffrent jdk versions
+
+Verify the set JAVA Version:
+
+      java -version
+Install and Setup PostgreSQL 10 Database for SonarQube
+PostgreSQL repo to the repo list:
+
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+Download PostgreSQL software
+
+wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
+Install, start and ensure PostgreSQL Database Server enables automatically during booting
+
+   sudo apt-get -y install postgresql postgresql-contrib
+   sudo systemctl start postgresql
+   sudo systemctl enable postgresql
+Change the password for the default postgres user
+
+sudo passwd postgres
+Set up User and password for postgres
+
+Switch to the postgres user
+
+ su - postgres
