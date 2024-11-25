@@ -1,4 +1,4 @@
-![Screenshot 2024-11-21 191509](https://github.com/user-attachments/assets/f87cbb39-8ada-466a-a9c8-b065e9c9a5f4)EXPERIENCE CONTINUOUS INTEGRATION WITH JENKINS | ANSIBLE | ARTIFACTORY | SONARQUBE | PHP
+EXPERIENCE CONTINUOUS INTEGRATION WITH JENKINS | ANSIBLE | ARTIFACTORY | SONARQUBE | PHP
 
 This project introduces foundational DevOps concepts to help you understand and implement an efficient CI/CD pipeline. It emphasizes the importance of understanding CI/CD workflows, tools, and success metrics before diving into hands-on activities.
 
@@ -252,7 +252,6 @@ Click "Open blue oceans" plugin and create a new pipeline
 
 Select github
 Connect github with jenkins using your github personal access token
-
 
 Select the repository
 Create the pipeline Here is our newly created pipeline. It takes the name of your GitHub repository.
@@ -555,7 +554,7 @@ and add the code below to static-assignments/artifactory.yml
   become: true
 ![Screenshot 2024-11-17 090843](https://github.com/user-attachments/assets/d9f6cea0-3500-442f-ace8-18b48e4a2c0f)
 ![Screenshot 2024-11-17 090858](https://github.com/user-attachments/assets/8abe6d68-a383-4536-8726-fe8dda6e69ca)
-
+![Screenshot 2024-11-21 191509](https://github.com/user-attachments/assets/f87cbb39-8ada-466a-a9c8-b065e9c9a5f4)
 Configure Artifactory plugin by going to manage jenkins > system configurations, scroll down to jfrog and click on add instance
 
 Input the ID, artifactory url , username and password
