@@ -50,7 +50,7 @@ Always make reference to the architectural diagram and ensure that your configur
 Actions > Edit VPC Settings > Enable DNS hostnames
 ### 2. Create subnets as shown in the architecture
 ![Screenshot 2024-12-05 123157](https://github.com/user-attachments/assets/42e701bb-13bc-4a37-a8c8-62c8fff05e71)
-
+you may decide to create all at once or create them imdividually
 Create public and private subnets in each availablity zones respectively. Thus, we create public subnet in availability zone A and B respectively. We create 4 private subnets with respect to the diagram we are working with as such we create 2 private subnets each in availability zone A and B.
 ![Screenshot 2024-12-05 132954](https://github.com/user-attachments/assets/df07dd93-8b02-4b26-8b9f-841bd057ec76)
 Enable Auto-assign public IPv4 address in the public subnets.
