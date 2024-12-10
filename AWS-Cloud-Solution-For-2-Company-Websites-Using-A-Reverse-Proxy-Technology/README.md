@@ -253,3 +253,324 @@ sudo yum install -y make
 ```bash
 sudo yum install -y rpm-build
 ```
+![Screenshot 2024-12-08 142641](https://github.com/user-attachments/assets/23934d76-e9f1-4e44-92ed-f4d758fa9405)
+```bash
+# openssl-devel is needed by amazon-efs-utils-2.0.4-1.el9.x86_64
+sudo yum install openssl-devel -y
+```
+```bash
+# Cargo command needs to be installed as it is necessary for building the Rust project included in the source.
+sudo yum install cargo -y
+```
+![Screenshot 2024-12-08 144530](https://github.com/user-attachments/assets/b60664b3-eb03-49bb-a119-0ac0397dba0f)
+```bash
+sudo make rpm
+```
+![Screenshot 2024-12-08 144825](https://github.com/user-attachments/assets/dbdc65cd-d1f2-498f-8c8f-711d44350a89)
+```bash
+sudo yum install -y  ./build/amazon-efs-utils*rpm
+```
+![Screenshot 2024-12-08 145220](https://github.com/user-attachments/assets/e935f2e7-0a9a-48d8-af30-5dc3a65edc7a)
+
+__Repeat the steps above for Webservers__
+We are using an ACM (Amazon Certificate Manager) certificate for both our external and internal load balancers.
+But for some reasons, we might want to add a self-signed certificate:
+
+- __Compliance Requirements:__
+  - Certain industry regulations and standards (e.g., PCI DSS, HIPAA) require end-to-end encryption, including between internal load balancers and backend servers (within a private network).
+
+- __Defense in Depth:__
+  - Adding another layer of security by encrypting traffic between internal load balancers and web servers can provide additional protection.
+
+When generating the certificate, In the common name, enter the private IPv4 dns of the instance (for Webserver and Nginx). We use the certificate by specifying the path to the file fnc.crt and fnc.key in the nginx configuration.
+
+## Set up self-signed certificate for the nginx instance
+
+```bash
+sudo mkdir /etc/ssl/private
+
+sudo chmod 700 /etc/ssl/private
+
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/fnc.key -out /etc/ssl/certs/fnc.crt
+```
+![Screenshot 2024-12-08 200004](https://github.com/user-attachments/assets/50d35136-ae7a-4e54-ba86-6f61cdef3a41)
+```bash
+sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+![Screenshot 2024-12-08 203550](https://github.com/user-attachments/assets/697ac805-0605-44f4-b206-f9b0da2808d7)
+## Set up self-signed certificate for the Apache Webserver instance
+
+```bash
+sudo yum install -y mod_ssl
+```
+```bash
+sudo openssl req -newkey rsa:2048 -nodes -keyout /etc/pki/tls/private/fnc.key -x509 -days 365 -out /etc/pki/tls/certs/fnc.crt
+```
+```bash
+# Edit the ssl.conf to conform with the key and crt file created.
+sudo vim /etc/httpd/conf.d/ssl.conf
+```
+![Screenshot 2024-12-08 203835](https://github.com/user-attachments/assets/4f90068d-197e-4f1b-ac43-ceb35bef7a7d)
+![Screenshot 2024-12-08 203749](https://github.com/user-attachments/assets/41730a99-9e4b-4cbc-9a8e-1ed0317fa005)
+![Screenshot 2024-12-08 204802](https://github.com/user-attachments/assets/36187c9a-2e2f-42a4-8808-84ce95c94245)
+![Screenshot 2024-12-08 204748](https://github.com/user-attachments/assets/b616259b-bd8d-424c-a6b2-75936bb1a13b)
+![Screenshot 2024-12-08 204518](https://github.com/user-attachments/assets/40accbdb-3bad-4c33-8065-090df48c55fc)
+## [Create an AMI](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/tkv-create-ami-from-instance.html) out of the EC2 instances
+
+On the EC2 instance page, Go to Actions > Image and templates > Create image
+
+__For Bastion AMI__
+![Screenshot 2024-12-08 205529](https://github.com/user-attachments/assets/c04a917b-e1b8-4ec2-bc22-92c760364e58)
+![Screenshot 2024-12-08 205658](https://github.com/user-attachments/assets/c9582a92-d159-4c09-9d84-3ec1c37cb912)
+
+__For Nginx AMI__
+![Screenshot 2024-12-08 205643](https://github.com/user-attachments/assets/3d57a512-ccaa-495a-b851-962cc3179320)
+__For Webservers AMI__
+![Screenshot 2024-12-08 205750](https://github.com/user-attachments/assets/311f4776-8857-469f-aa85-1fa8b111091c)
+
+__All AMIs__
+![Screenshot 2024-12-08 205844](https://github.com/user-attachments/assets/493541da-d154-432d-ac75-84bf5ffb4da2)
+## CONFIGURE TARGET GROUPS
+
+Create Target groups for Nginx, Worpress and Tooling
+
+__For Nginx Target Group__
+![Screenshot 2024-12-08 210100](https://github.com/user-attachments/assets/aa1a2bfc-53b9-4b46-b171-9d736e297dd4)
+![Screenshot 2024-12-08 205946](https://github.com/user-attachments/assets/e70a9b2e-25ff-4741-993b-f029d1451004)
+![Screenshot 2024-12-08 205935](https://github.com/user-attachments/assets/caa0bb77-0462-478a-bce7-912412bafe0d)
+__For Wordpress Target Group__
+![Screenshot 2024-12-09 003114](https://github.com/user-attachments/assets/0733503b-b8f4-4021-8eeb-b48e52566f70)
+__For Tooling Target Group__
+
+![Screenshot 2024-12-09 003311](https://github.com/user-attachments/assets/18d11ce5-c770-4bae-9341-02562560619a)
+![Screenshot 2024-12-09 003459](https://github.com/user-attachments/assets/0e283dd9-fd9e-43cc-8dd3-9a8ebf5347fb)
+
+# Configure Application Load Balancer (ALB)
+
+### External Application Load Balancer To Route Traffic To NGINX
+
+Nginx EC2 Instances will have configurations that accepts incoming traffic only from Load Balancers. No request should go directly to Nginx servers. With this kind of setup, we will benefit from intelligent routing of requests from the ALB to Nginx servers across the 2 Availability Zones. We will also be able to [offload](https://avinetworks.com/glossary/ssl-offload/) SSL/TLS certificates on the ALB instead of Nginx. Therefore, Nginx will be able to perform faster since it will not require extra compute resources to valifate certificates for every request.
+
+1. Create an Internet facing ALB
+2. Ensure that it listens on HTTPS protocol (TCP port 443)
+3. Ensure the ALB is created within the appropriate VPC | AZ | Subnets
+4. Choose the Certificate from ACM
+5. Select Security Group
+6. Select Nginx Instances as the target group
+![Screenshot 2024-12-09 004536](https://github.com/user-attachments/assets/e3a6272d-820f-480f-9950-9775c94a566b)
+![Screenshot 2024-12-09 004333](https://github.com/user-attachments/assets/b4657bd6-c94f-424b-8d7b-b634f06734f2)
+![Screenshot 2024-12-09 003836](https://github.com/user-attachments/assets/ea3b2617-dbbf-4676-9588-10345e844d1e)
+![Screenshot 2024-12-09 003808](https://github.com/user-attachments/assets/def274de-59b0-4c7a-990d-dc62cd2b8f45)
+![Screenshot 2024-12-09 004547](https://github.com/user-attachments/assets/fcdfd865-e8d2-455b-b5d9-7fd5713ede3b)
+### Application Load Balancer To Route Traffic To Webservers
+
+Since the webservers are configured for auto-scaling, there is going to be a problem if servers get dynamically scalled out or in. Nginx will not know about the new IP addresses, or the ones that get removed. Hence, Nginx will not know where to direct the traffic.
+
+To solve this problem, we must use a load balancer. But this time, it will be an internal load balancer. Not Internet facing since the webservers are within a private subnet, and we do not want direct access to them.
+
+1. Create an Internal ALB
+2. Ensure that it listens on HTTPS protocol (TCP port 443)
+3. Ensure the ALB is created within the appropriate VPC | AZ | Subnets
+4. Choose the Certificate from ACM
+5. Select Security Group
+6. Select webserver Instances as the target group
+7. Ensure that health check passes for the target group
+
+__NOTE:__ This process must be repeated for both WordPress and Tooling websites.
+![Screenshot 2024-12-09 005122](https://github.com/user-attachments/assets/11726b2b-b874-4899-92c9-23abae712a85)
+![Screenshot 2024-12-09 005057](https://github.com/user-attachments/assets/05047cdc-061d-4672-a04a-6b803d8f7e4c)
+![Screenshot 2024-12-09 005231](https://github.com/user-attachments/assets/0b338fdf-34a9-4238-a170-bde6750ffbed)
+![Screenshot 2024-12-09 005217](https://github.com/user-attachments/assets/16441d46-ea5f-488a-a61f-fdeb97f7675c)
+The default target configured on the listener while creating the internal load balancer is to forward traffic to wordpress on port 443. Hence, we need to create a rule to route traffic to tooling as well.
+
+1.	Select internal load balancer from the list of load balancers created:
+	-	Choose the load balancer where you want to add the rule.
+2.	Listeners Tab:
+	-	Click on the Listeners tab.
+	-	Select the listener (HTTPS:443) and click Manage listener.
+3.	Add Rules:
+	-	Click on Add rule.
+4.	Configure the Rule:
+	-	Give the rule a name and click next.
+	-	Add a condition by selecting `Host header`.
+	-	Enter the `hostnames` for which you want to route traffic. (tooling.com and www.tooling.com).
+	-	Choose the appropriate target group for the `hostname`.
+![Screenshot 2024-12-09 010155](https://github.com/user-attachments/assets/bd3a2121-20d1-429d-bf43-e525b2cbc996)
+![Screenshot 2024-12-09 010124](https://github.com/user-attachments/assets/69d7e952-2f7c-42b5-ab08-2f9186b974b7)
+![Screenshot 2024-12-09 010049](https://github.com/user-attachments/assets/efae4c41-ebed-44fa-b2ca-05b0370c1e24)
+![Screenshot 2024-12-09 005442](https://github.com/user-attachments/assets/4251069a-74ed-41c9-8c2c-2cf0de4abd84)
+![Screenshot 2024-12-09 010241](https://github.com/user-attachments/assets/941f4b72-6820-44a3-a9c8-cdf957edc19d)
+## PREPARE LAUNCH TEMPLATE FOR NGINX (ONE PER SUBNET)
+
+1. Make use of the AMI to set up a launch template
+2. Ensure the Instances are launched into a public subnet.
+3. Assign appropriate security group.
+4. Configure [Userdata](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) to update yum package repository and install nginx.
+Ensure to `enable auto-assign public IP` in the Advance Network Configuration
+![Screenshot 2024-12-09 010606](https://github.com/user-attachments/assets/248cb1f2-868e-4cb5-b054-cc64a7c944d8)
+![Screenshot 2024-12-09 010522](https://github.com/user-attachments/assets/bae37793-b0d0-4a87-9e52-9b015543703e)
+![Screenshot 2024-12-09 010806](https://github.com/user-attachments/assets/6920cdab-2934-47a3-94e6-dc1fb907b27c)
+![Screenshot 2024-12-09 044737](https://github.com/user-attachments/assets/8ed96f69-dc19-46c9-a4d3-0e73f4af313d)
+
+__Repeat the same setting for Bastion, the difference here is the userdata input, AMI and security group__.
+![Screenshot 2024-12-09 050357](https://github.com/user-attachments/assets/5205b54a-691a-41ba-9b00-62e23b836045)
+![Screenshot 2024-12-09 050506](https://github.com/user-attachments/assets/15d566b8-3f63-41fd-be61-b61f82317f19)
+![Screenshot 2024-12-09 050427](https://github.com/user-attachments/assets/82c5ad36-0c22-4bd1-80c7-cecf58edb60e)
+
+### Wordpress Userdata
+
+NB: Both Wordpress and Tooling make use of Webserver AMI.
+
+Update the mount point to the file system, this should be done on access points for tooling and wordpress respectively.
+
+NB: Both Wordpress and Tooling make use of Webserver AMI.
+
+Update the mount point to the file system, this should be done on access points for tooling and wordpress respectively.
+`sudo mount -t efs -o tls,accesspoint=fsap-0a05d5cb95059314c fs-01bb3fe22fdd61691:/ /var/www/`
+The RDS end point is also needed
+```
+mkdir /var/www/
+
+sudo mount -t efs -o tls,accesspoint=fsap-0b018d904b0fc7c04 fs-0d2abcf9777f93f56:/ /var/www/
+
+
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+
+yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+
+systemctl start php-fpm
+systemctl enable php-fpm
+
+wget http://wordpress.org/latest.tar.gz
+
+tar xzvf latest.tar.gz
+rm -rf latest.tar.gz
+
+cp wordpress/wp-config-sample.php wordpress/wp-config.php
+mkdir /var/www/html/
+cp -R /wordpress/* /var/www/html/
+cd /var/www/html/
+touch healthstatus
+
+sed -i "s/localhost/techeon-db.czw0c2uys7jo.us-east-1.rds.amazonaws.com/g" wp-config.php
+sed -i "s/username_here/adminr/g" wp-config.php
+sed -i "s/password_here/Opeoluwa1./g" wp-config.php
+sed -i "s/database_name_here/techeon-db/g" wp-config.php
+
+chcon -t httpd_sys_rw_content_t /var/www/html/ -R
+
+systemctl restart httpd
+
+
+```
+
+### Tooling userdata
+
+```
+#!/bin/bash
+mkdir /var/www/
+
+sudo mount -t efs -o tls,accesspoint=fsap-0a05d5cb95059314c fs-01bb3fe22fdd61691:/ /var/www/
+
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+
+yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+
+systemctl start php-fpm
+systemctl enable php-fpm
+
+git clone https://github.com/Maarioon/techeon-tooling2
+
+mkdir /var/www/html
+sudo cp -R /tooling/html/*  /var/www/html/
+cd /tooling2
+
+mysql -h techeon-db.czw0c2uys7jo.us-east-1.rds.amazonaws.com -u admin -p Opeoluwa1.  toolingdb < tooling-db.sql
+
+cd /var/www/html/
+touch healthstatus
+
+sed -i "s/$db = mysqli_connect('mysql.tooling.svc.cluster.local', 'admin', 'admin', 'tooling');/$db = mysqli_connect('techeon-db.czw0c2uys7jo.us-east-1.rds.amazonaws.com', 'admin', 'Opeoluwa1.', 'toolingdb');/g" functions.php
+
+chcon -t httpd_sys_rw_content_t /var/www/html/ -R
+
+mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf_backup
+
+systemctl restart httpd
+sudo systemctl status httpd
+
+```
+![Screenshot 2024-12-09 044737](https://github.com/user-attachments/assets/28f3d197-8238-4930-a50d-b070be488c56)
+![Screenshot 2024-12-09 044800](https://github.com/user-attachments/assets/df63e2dc-34a3-4f83-b4e7-3bf993d9b1e0)
+
+## CONFIGURE AUTOSCALING FOR NGINX
+
+1. Select the right launch template
+2. Select the VPC
+3. Select both public subnets
+4. Enable Application Load Balancer for the AutoScalingGroup (ASG)
+5. Select the target group you created before
+6. Ensure that you have health checks for both EC2 and ALB
+7. The desired capacity is 2
+8. Minimum capacity is 2
+9. Maximum capacity is 4
+10. Set [scale out](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-lifecycle.html) if CPU utilization reaches 90%
+11. Ensure there is an [SNS](https://docs.aws.amazon.com/sns/latest/dg/welcome.html) topic to send scaling notifications
+### Create Auto Scaling Group for Bastion
+![Screenshot 2024-12-09 050506](https://github.com/user-attachments/assets/0f425b1d-1d17-489d-b7e1-42414db53927)
+![Screenshot 2024-12-09 050427](https://github.com/user-attachments/assets/8cff1e06-810d-426e-81da-9d773ff85b25)
+![Screenshot 2024-12-09 050357](https://github.com/user-attachments/assets/5a0ccd05-421f-45ca-a623-dad4e771c25b)
+![Screenshot 2024-12-09 050744](https://github.com/user-attachments/assets/b21f31bb-e949-466a-8d25-b9a65b04f54f)
+![Screenshot 2024-12-09 051241](https://github.com/user-attachments/assets/8b829602-0ead-4358-a712-ed051d79b518)
+__Access RDS through Bastion connection to craete database for wordpress and tooling.__
+
+ Copy the RDS endpoint to be used as host
+![Screenshot 2024-12-09 054217](https://github.com/user-attachments/assets/e9fa9745-20ae-46cb-8700-84e79350127c)
+### Create Auto Scaling Group for Nginx
+![Screenshot 2024-12-09 054541](https://github.com/user-attachments/assets/95a15bc4-8642-4637-b912-3b6f18ff829a)
+![Screenshot 2024-12-09 054527](https://github.com/user-attachments/assets/6888ab6d-b1bd-4df6-95f3-4e4eec98cb36)
+![Screenshot 2024-12-09 054512](https://github.com/user-attachments/assets/dc25f010-9b9e-4319-a9a2-51962deb421e)
+![Screenshot 2024-12-09 054433](https://github.com/user-attachments/assets/1804d956-e1a0-4b73-a448-dc0ba4eb763d)
+![Screenshot 2024-12-09 054413](https://github.com/user-attachments/assets/3f36c715-f7c5-47e3-8915-8ce5d042ec78)
+![Screenshot 2024-12-09 054347](https://github.com/user-attachments/assets/7f5f1de9-0ba6-4efe-80c1-bb379e9fd05f)
+![Screenshot 2024-12-09 054310](https://github.com/user-attachments/assets/fb4886cc-c8a6-4bc4-9f65-999784fc3933)
+![Screenshot 2024-12-09 054636](https://github.com/user-attachments/assets/b42e53dc-c6e6-4d92-97e1-d51717c1b2ff)
+### Repeat the Nginx Auto Scaling Group steps above for Wordpress and Tooling with their right launch template
+
+All Auto Scaling Groups
+![Screenshot 2024-12-09 064807](https://github.com/user-attachments/assets/fc393b6a-960e-4ed2-a1d2-59b9a29adade)
+
+# Configuring DNS with Route53
+
+Earlier in this project we registered a free domain with `Cloudns` and configured a hosted zone in [Route53](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html). But that is not all that needs to be done as far as `DNS` configuration is concerned.
+
+We need to ensure that the main domain for the WordPress website can be reached, and the subdomain for Tooling website can also be reached using a browser.
+
+Create other records such as [CNAME, alias and A records](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/route-53-concepts.html).
+
+NOTE: You can use either CNAME or alias records to achieve the same thing. But alias record has better functionality because it is a faster to resolve DNS record, and can coexist with other records on that name. Read [here](https://support.dnsimple.com/articles/differences-between-a-cname-alias-url/#:~:text=The%20A%20record%20maps%20a,a%20name%20to%20another%20name.&text=The%20ALIAS%20record%20maps%20a,the%20HTTP%20301%20status%20code) to get to know more about the differences.
+
+- Create an alias record for the root domain and direct its traffic to the ALB DNS name.
+- Create an alias record for `tooling.fncloud.dns-dynamic.net` and direct its traffic to the ALB DNS name.
+![Screenshot 2024-12-09 065413](https://github.com/user-attachments/assets/806bc693-1f0e-4f52-b022-7a378e0077ec)
+![Screenshot 2024-12-09 065212](https://github.com/user-attachments/assets/2ebd07a0-702b-4f8e-a14f-b9e85e321be5)
+![Screenshot 2024-12-09 065506](https://github.com/user-attachments/assets/9a560f7f-d7b0-4971-a1d3-a95ad5b5e1a1)
+### Ensure that health check passes for the target groups
+do it for all target group
+![Screenshot 2024-12-09 065638](https://github.com/user-attachments/assets/9049e872-911e-4a70-92ec-fa586c4bfde2)
+__Let's access our wordpress website__
+![Screenshot 2024-12-09 134324](https://github.com/user-attachments/assets/8b1f0b6a-25e4-466c-a2cb-4ba3c7590b38)
+![Screenshot 2024-12-09 134306](https://github.com/user-attachments/assets/cc3eeeae-0c3a-4d51-9a20-80229e3000d2)
+![Screenshot 2024-12-09 133421](https://github.com/user-attachments/assets/dedd0a10-65c4-4313-ba4a-bfa76ee58d58)
+
+We have just created a secured, scalable and cost-effective infrastructure to host 2 enterprise websites using various Cloud services from AWS. At this point, our infrastructure is ready to host real websites' load.
